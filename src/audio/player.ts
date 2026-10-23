@@ -1,5 +1,5 @@
 import { epochNow, toLocal } from '../clock.ts';
-import { brickById, type Palette } from '../palette.ts';
+import { brickById, type Palette, type PaletteBrick } from '../palette.ts';
 import { describeSource, type PromptStyle, renderPrompts, type SourceInfo } from '../prompts.ts';
 import type { ForecastHit } from '../protocol.ts';
 import { chunkAt, chunkStart, type Grid, holdFilter, plan, quantise } from './chunks.ts';
@@ -195,7 +195,9 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
   let t0 = 0; // audio-clock time of track position 0, while sound runs
   let live = false; // sound is on the audio clock (scheduled from the timeline)
   let dryWait = 0; // epoch ms: browsing, the original holds back until then while the version's chunk is on its way
-  const sigma = () => strength(settings.intensity);
+  // A brick's strength (σ) and push: its own when it has them (made with New emotion), else the settings'.
+  const sigmaOf = (b?: PaletteBrick) => b?.strength ?? strength(settings.intensity);
+  const pushOf = (b?: PaletteBrick) => b?.push ?? settings.push;
 
   // What a track's renders depend on: its chunk grid (on its bar lines, from its analysis) and its source description.
   function planOf(name: string, duration: number, analysis?: Analysis): Plan {
@@ -230,8 +232,8 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
 
   let prerenderTimer: ReturnType<typeof setTimeout> | undefined;
   let prerenderPoll: ReturnType<typeof setInterval> | undefined;
-  const key = (brick: number, k: number) =>
-    `${track?.name}|${settings.style}|${brick}|${k}|${sigma().toFixed(2)}|${settings.push.toFixed(2)}`;
+  // A render is its request: the same texts, σ, push, span and seed are the same audio (an edited emotion is new).
+  const key = (brick: number, k: number) => (track ? JSON.stringify(requestOf(track, brick, k) ?? [brick, k]) : '');
   const ready = (brick: number, k: number) => cache.get(key(brick, k))?.buffer;
 
   // The timeline: track position now (frozen while paused), and of an epoch.
@@ -401,9 +403,9 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
       start: chunkStart(t.grid, k),
       seconds: t.grid.length,
       prompt,
-      negative: settings.push > 1 ? negative : null,
-      cfg: settings.push,
-      strength: strength(settings.intensity),
+      negative: pushOf(b) > 1 ? negative : null,
+      cfg: pushOf(b),
+      strength: sigmaOf(b),
       seed: brick * 1000 + k,
     };
   }
@@ -793,7 +795,11 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
     // The texts a version's renders of this track are made with (offline: shown under the Listen lanes).
     promptsOf(brick: number) {
       const r = track && requestOf(track, brick, 0);
-      return r && { prompt: r.prompt, negative: r.negative ?? '' };
+      return r && { prompt: r.prompt, negative: r.negative ?? '', strength: r.strength, push: r.cfg };
+    },
+    // What a brick without its own strength and push renders with (the settings).
+    get defaults() {
+      return { strength: strength(settings.intensity), push: settings.push };
     },
     // Every chunk of every version of this track, as the server renders it (offline: the Listen tab's envelopes, from
     // the renders on its disk).

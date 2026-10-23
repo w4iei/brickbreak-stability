@@ -148,15 +148,31 @@ def get_emotions() -> list[dict]:
         return []
 
 
-@app.put("/api/emotions")
-def put_emotions(bricks: list[dict]) -> dict:
-    for b in bricks:
-        if not isinstance(b.get("id"), int) or not str(b.get("label", "")).strip() or not str(b.get("feel", "")).strip():
-            raise HTTPException(400, "each emotion needs an id, a label and words")
+def save_emotions(bricks: list[dict]) -> list[dict]:
     tmp = EMOTIONS.with_suffix(".part")
     tmp.write_text(json.dumps(bricks, indent=1, ensure_ascii=False))
     os.replace(tmp, EMOTIONS)
-    return {"ok": True, "count": len(bricks)}
+    return bricks
+
+
+# One at a time, so two open pages each add theirs instead of the last one's list replacing the other's.
+@app.post("/api/emotions")
+def put_emotion(b: dict) -> dict:
+    """Add an emotion, or change one (same id and name). An id another emotion has gets the next free one."""
+    if not isinstance(b.get("id"), int) or not str(b.get("label", "")).strip() or not str(b.get("feel", "")).strip():
+        raise HTTPException(400, "an emotion needs an id, a name and words")
+    mine = get_emotions()
+    rename = b.pop("rename", False)  # an edit of the emotion with this id: its name may change too
+    same = next((x for x in mine if x["id"] == b["id"]), None)
+    if same and same["label"] != b["label"] and not rename:  # another page made a different one with this id
+        b["id"], same = max([99, *(x["id"] for x in mine)]) + 1, None
+    mine = [b if x["id"] == b["id"] else x for x in mine] if same else [*mine, b]
+    return {"emotion": b, "emotions": save_emotions(mine)}
+
+
+@app.delete("/api/emotions/{eid}")
+def delete_emotion(eid: int) -> dict:
+    return {"emotions": save_emotions([x for x in get_emotions() if x["id"] != eid])}
 
 
 @app.get("/api/envelope/{name:path}")

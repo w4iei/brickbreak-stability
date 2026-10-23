@@ -17,6 +17,8 @@ export interface PaletteBrick {
   // track already is (its sound tags and tempo); `negative` '' pushes away from nothing.
   template?: boolean;
   negative?: string;
+  strength?: number; // σ for this brick's renders (else the intensity dial's): more noise steers harder, keeps less
+  push?: number; // its guidance away from the negative (else the setting's)
 }
 
 export interface Palette {

@@ -26,7 +26,7 @@ export interface ListenView {
   fill(version: string, start: number, span: number, buffer: AudioBuffer): void; // audio of a version: its envelope there
   merge(f: EnvelopeFile): void; // versions' envelopes as far as they are rendered (a 0 byte: not yet)
   update(pos: number, active: number | undefined, pending: boolean, paused: boolean): void;
-  setQuery(label: string, prompt: string, negative: string): void; // offline: the playing version's texts ('' hides)
+  setQuery(label: string, prompt: string, negative: string, dial?: string): void; // offline: the playing version's texts ('' hides)
 }
 
 export interface EnvelopeFile {
@@ -391,10 +391,11 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
       }
       redraw();
     },
-    setQuery(label, prompt, negative) {
+    setQuery(label, prompt, negative, dial) {
       const q = $('query');
       q.hidden = !prompt;
-      if (prompt) q.innerHTML = `<b>${esc(label)}</b> · “${esc(prompt)}”${negative ? ` · away from “${esc(negative)}”` : ''}`;
+      if (prompt)
+        q.innerHTML = `<b>${esc(label)}</b> · “${esc(prompt)}”${negative ? ` · away from “${esc(negative)}”` : ''}${dial ? ` · ${esc(dial)}` : ''}`;
     },
     update(pos, active, pending, paused) {
       const t = preview ?? pos;

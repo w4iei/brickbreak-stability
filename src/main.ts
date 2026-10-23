@@ -234,7 +234,9 @@ const emotions = STATIC
       board: () => board().bricks,
       mine: () => sim.extra.filter((x) => board().bricks.some((b) => b === x)), // not ones the palette has taken in
       source: () => player.source,
+      defaults: () => player.defaults,
       onChange(list) {
+        if (JSON.stringify(list) === JSON.stringify(sim.extra)) return;
         sim.extra = list;
         if (states.active !== undefined && !brickById(board(), states.active)) clearState(); // the one playing went
         fitField();
@@ -310,7 +312,7 @@ function showQuery(id: number | undefined) {
   const key = JSON.stringify([id, q]);
   if (key === queryFor) return;
   queryFor = key;
-  listen.setQuery(b?.label ?? '', q?.prompt ?? '', q?.negative ?? '');
+  listen.setQuery(b?.label ?? '', q?.prompt ?? '', q?.negative ?? '', q && `strength ${q.strength.toFixed(2)}${q.negative ? ` · push ${q.push.toFixed(1)}` : ''}`);
 }
 // Offline, while Listen is open: each version's envelope from the renders on the server's disk, so a new emotion's
 // lane fills in as it pre-renders. A version with every chunk in is not asked for again until the track or a setting
@@ -322,7 +324,7 @@ setInterval(async () => {
   if (STATIC || !listening || document.hidden || asking) return;
   const q = player.versionChunks();
   if (!q) return;
-  const key = JSON.stringify([q.track, breakout.intensity, breakout.push, breakout.style, sim.extra.map((b) => [b.id, b.prompt, b.negative, b.feel, b.opposite])]);
+  const key = JSON.stringify([q.track, breakout.intensity, breakout.push, breakout.style, sim.extra]);
   if (key !== completeFor) {
     if (completeFor && JSON.parse(completeFor)[0] === q.track) listen.setTrack(q.track, q.duration); // renders changed
     [complete, completeFor] = [new Set(), key];
