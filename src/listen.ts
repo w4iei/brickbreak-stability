@@ -26,6 +26,7 @@ export interface ListenView {
   fill(version: string, start: number, span: number, buffer: AudioBuffer): void; // audio of a version: its envelope there
   merge(f: EnvelopeFile): void; // versions' envelopes as far as they are rendered (a 0 byte: not yet)
   update(pos: number, active: number | undefined, pending: boolean, paused: boolean): void;
+  setQuery(label: string, prompt: string, negative: string): void; // offline: the playing version's texts ('' hides)
 }
 
 export interface EnvelopeFile {
@@ -70,6 +71,9 @@ const CSS = `
 .site button.ls-add-icon { display: none; font-size: 20px; }
 .ls-foot { flex: none; display: grid; justify-items: center; gap: 10px; }
 .ls-how { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; }
+.ls-query { margin: 0; width: 100%; max-width: 1280px; font-size: 12.5px; color: var(--muted); -webkit-user-select: text; user-select: text; }
+.ls-query b { color: var(--fg); letter-spacing: 0.05em; }
+.ls-query[hidden] { display: none; }
 .ls-transport { display: flex; align-items: center; gap: 24px; }
 .site button.ls-play { width: 64px; height: 64px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); box-shadow: 0 0 0 8px rgba(238, 242, 246, 0.12); }
 .ls-play svg { width: 26px; height: 26px; }
@@ -101,6 +105,7 @@ const lit = (hex: string) => {
 };
 const dB = (b64: string) => Float32Array.from(atob(b64), (ch) => ch.charCodeAt(0) / 4 - 60);
 const bytes = (b64: string) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0));
+const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 
 export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: string) => Promise<EnvelopeFile | undefined>, d: ListenDeps): ListenView {
   const style = document.createElement('style');
@@ -119,6 +124,7 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
     </div>
     <button class="ls-add" data-k="add" hidden>+ New emotion</button>
     <div class="ls-foot">
+      <p class="ls-query" data-k="query" hidden></p>
       <p class="ls-how">Tap a name to switch version. Tap or drag on a version to jump there.</p>
       <div class="ls-transport">
         <button class="icon" data-k="start" aria-label="Back to the start">${ICON.start}</button>
@@ -384,6 +390,11 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
         dirty.add(k);
       }
       redraw();
+    },
+    setQuery(label, prompt, negative) {
+      const q = $('query');
+      q.hidden = !prompt;
+      if (prompt) q.innerHTML = `<b>${esc(label)}</b> · “${esc(prompt)}”${negative ? ` · away from “${esc(negative)}”` : ''}`;
     },
     update(pos, active, pending, paused) {
       const t = preview ?? pos;

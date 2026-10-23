@@ -16,6 +16,8 @@ test('a new emotion gets a fresh id and a colour not on the board, and joins the
   const row = paletteOf({ palette: 'site', extra: [a, b] }).bricks;
   assert.deepEqual(row.slice(-2), [a, b]);
   assert.equal(paletteOf({ palette: 'site', extra: [] }), palette('site')); // nothing made: the palette as it is
+  const taken = { ...a, id: site[0].id }; // one the palette has since taken in
+  assert.equal(paletteOf({ palette: 'site', extra: [taken] }), palette('site'));
 });
 
 test("a new emotion's renders keep the track's sound and push away from its opposite, or from nothing", () => {
@@ -28,4 +30,19 @@ test("a new emotion's renders keep the track's sound and push away from its oppo
   const free = makeEmotion('calm', 'calm', undefined, site);
   assert.equal(free.opposite, free.id);
   assert.equal(renderPrompts(free, site.find((x) => x.id === free.opposite), 'source', 'techno').negative, '');
+});
+
+test('texts typed whole: {track} becomes the track, the result matches the words-only form, and anything goes', async () => {
+  const { makeFromTexts } = await import('./emotions.ts');
+  const { fillTrack } = await import('./prompts.ts');
+  const site = palette('site').bricks;
+  const serenity = site.find((x) => x.label === 'SERENITY')!;
+  const words = makeEmotion('lust', 'lustful, sensual', serenity.id, site);
+  const typed = makeFromTexts('lust', '{track}, lustful, sensual', `{track}, ${serenity.feel}`, serenity.id, site);
+  const src = 'trance, techno, 140 BPM';
+  assert.deepEqual(renderPrompts(typed, serenity, 'source', src), renderPrompts(words, serenity, 'source', src)); // same renders
+  const sax = makeFromTexts('longing', 'longing, {track}, saxophone solo', '', undefined, site);
+  assert.deepEqual(renderPrompts(sax, undefined, 'source', src), { prompt: `longing, ${src}, saxophone solo`, negative: '' });
+  assert.equal(fillTrack('{track}, lonely', ''), 'lonely'); // no analysis: no stray comma
+  assert.equal(sax.feel, 'longing, saxophone solo');
 });

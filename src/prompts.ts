@@ -35,7 +35,15 @@ export function describeSource(a: SourceInfo | undefined): string {
   return parts.join(', ');
 }
 
+// A typed text with {track} in it, for this track (and tidy where the track has no description).
+export const fillTrack = (text: string, source: string) =>
+  text
+    .replaceAll('{track}', source)
+    .replace(/(\s*,\s*)+/g, ', ')
+    .replace(/^[\s,]+|[\s,]+$/g, '');
+
 export function renderPrompts(b: PaletteBrick, opposite: PaletteBrick | undefined, style: PromptStyle, source: string) {
+  if (b.template) return { prompt: fillTrack(b.prompt, source), negative: fillTrack(b.negative ?? '', source) };
   if (style === 'recipe') return { prompt: b.prompt, negative: opposite?.prompt ?? '' };
   const on = (feel: string) => (source ? `${source}, ${feel}` : feel);
   return { prompt: on(b.feel), negative: opposite ? on(opposite.feel) : '' };

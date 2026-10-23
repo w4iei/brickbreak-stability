@@ -13,6 +13,10 @@ export interface PaletteBrick {
   feel: string; // emotion words only, added to a description of the source: changes its feeling, keeps its sound
   listen: string[]; // emotion-only phrasings the analysis scores music against (averaged)
   original?: boolean; // not an emotion: hitting it brings the track back as it is
+  // Made with New emotion: `prompt` and `negative` are the whole texts, as typed, with {track} standing for what the
+  // track already is (its sound tags and tempo); `negative` '' pushes away from nothing.
+  template?: boolean;
+  negative?: string;
 }
 
 export interface Palette {
@@ -28,8 +32,10 @@ export const palette = (name: string): Palette => PALETTES[name] ?? PALETTES.emo
 
 export const brickById = (p: Palette, id: number | undefined) => p.bricks.find((b) => b.id === id);
 
-// The palette a game plays: its own bricks, then any made on this computer (New emotion), at the end of the row.
+// The palette a game plays: its own bricks, then any made on this computer (New emotion), at the end of the row. One
+// made here that the palette has since taken in (the same id or name) is the palette's.
 export const paletteOf = (p: { palette: string; extra?: PaletteBrick[] }): Palette => {
   const base = palette(p.palette);
-  return p.extra?.length ? { ...base, bricks: [...base.bricks, ...p.extra] } : base; // a paired row puts each alone at the end
+  const extra = (p.extra ?? []).filter((x) => !base.bricks.some((b) => b.id === x.id || b.label === x.label));
+  return extra.length ? { ...base, bricks: [...base.bricks, ...extra] } : base; // a paired row puts each alone at the end
 };

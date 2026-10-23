@@ -790,6 +790,11 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
     get source() {
       return track?.source ?? ''; // what the track is, as every prompt begins
     },
+    // The texts a version's renders of this track are made with (offline: shown under the Listen lanes).
+    promptsOf(brick: number) {
+      const r = track && requestOf(track, brick, 0);
+      return r && { prompt: r.prompt, negative: r.negative ?? '' };
+    },
     // Every chunk of every version of this track, as the server renders it (offline: the Listen tab's envelopes, from
     // the renders on its disk).
     versionChunks() {

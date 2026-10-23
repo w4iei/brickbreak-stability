@@ -405,6 +405,22 @@
           "overwhelming joy, soaring",
           "the feeling of pure bliss"
         ]
+      },
+      {
+        "id": 100,
+        "label": "LUST",
+        "pole": "light",
+        "opposite": 3,
+        "note": 72,
+        "color": "#c2185b",
+        "prompt": "lustful, sensual, seductive, sultry, heated, hungry",
+        "feel": "lustful, sensual, seductive, sultry, heated, hungry",
+        "listen": [
+          "music that feels like lust",
+          "lustful, sensual and seductive",
+          "sultry, heated and hungry",
+          "the feeling of burning desire"
+        ]
       }
     ]
   }

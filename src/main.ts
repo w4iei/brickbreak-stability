@@ -190,7 +190,11 @@ function frame() {
     site.setProgress(player.trackPos(now) ?? 0, t.duration);
   }
   site.setDemo(sim.autoplay);
-  if (listening) listen.update(player.trackPos(now) ?? 0, states.active ?? originalId(), player.pending, paused);
+  if (listening) {
+    const on = states.active ?? originalId();
+    listen.update(player.trackPos(now) ?? 0, on, player.pending, paused);
+    if (!STATIC) showQuery(on);
+  }
   if (now - windowStart > STATS_WINDOW_MS) {
     stats.headroomMs = Number.isFinite(windowMin) ? windowMin : 0;
     windowMin = Infinity;
@@ -228,7 +232,7 @@ const emotions = STATIC
   ? undefined
   : createEmotionCard({
       board: () => board().bricks,
-      mine: () => sim.extra,
+      mine: () => sim.extra.filter((x) => board().bricks.some((b) => b === x)), // not ones the palette has taken in
       source: () => player.source,
       onChange(list) {
         sim.extra = list;
@@ -298,6 +302,16 @@ function endListen() {
   setPaused(true);
   player.seek(0);
 }
+// Offline: under the Listen lanes, the texts the playing version is rendered from, for this track.
+let queryFor = '';
+function showQuery(id: number | undefined) {
+  const b = brickById(board(), id);
+  const q = b && !b.original ? player.promptsOf(b.id) : undefined;
+  const key = JSON.stringify([id, q]);
+  if (key === queryFor) return;
+  queryFor = key;
+  listen.setQuery(b?.label ?? '', q?.prompt ?? '', q?.negative ?? '');
+}
 // Offline, while Listen is open: each version's envelope from the renders on the server's disk, so a new emotion's
 // lane fills in as it pre-renders. A version with every chunk in is not asked for again until the track or a setting
 // that changes its renders does (which starts its lanes afresh).
@@ -308,7 +322,7 @@ setInterval(async () => {
   if (STATIC || !listening || document.hidden || asking) return;
   const q = player.versionChunks();
   if (!q) return;
-  const key = JSON.stringify([q.track, breakout.intensity, breakout.push, breakout.style, sim.extra.map((b) => b.id)]);
+  const key = JSON.stringify([q.track, breakout.intensity, breakout.push, breakout.style, sim.extra.map((b) => [b.id, b.prompt, b.negative, b.feel, b.opposite])]);
   if (key !== completeFor) {
     if (completeFor && JSON.parse(completeFor)[0] === q.track) listen.setTrack(q.track, q.duration); // renders changed
     [complete, completeFor] = [new Set(), key];
