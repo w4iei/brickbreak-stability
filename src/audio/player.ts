@@ -407,6 +407,7 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
       cfg: pushOf(b),
       strength: sigmaOf(b),
       seed: brick * 1000 + k,
+      ...(b.steps ? { steps: b.steps } : {}), // else the server's own (and its renders on disk stay these)
     };
   }
   // Every render a track could need, from chunk `from` to the end and then from the start, each chunk for every brick

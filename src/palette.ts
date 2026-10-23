@@ -19,6 +19,7 @@ export interface PaletteBrick {
   negative?: string;
   strength?: number; // σ for this brick's renders (else the intensity dial's): more noise steers harder, keeps less
   push?: number; // its guidance away from the negative (else the setting's)
+  steps?: number; // denoising steps of a full-strength run (else the server's 8): more rebuild new parts more finely
 }
 
 export interface Palette {

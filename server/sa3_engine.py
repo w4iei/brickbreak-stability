@@ -160,11 +160,11 @@ class SA3Engine:
         mx.eval(cross, glob)
         return cross, glob
 
-    def _sigmas(self, sigma: float, schedule: str) -> mx.array:
+    def _sigmas(self, sigma: float, schedule: str, steps: int) -> mx.array:
         build = self._f["build_pingpong_schedule"]
         if schedule == "repo":
-            return build(self.steps, sigma_max=sigma, use_logsnr_shift=True)
-        full = np.array(build(self.steps, sigma_max=1.0, use_logsnr_shift=True))
+            return build(steps, sigma_max=sigma, use_logsnr_shift=True)
+        full = np.array(build(steps, sigma_max=1.0, use_logsnr_shift=True))
         return mx.array(np.concatenate([[sigma], full[full < sigma]]).astype(np.float32))
 
     # Batched CFG, as model_fn in sa3_gradio.run_generation (apg=1.0): guidance in denoised
@@ -193,11 +193,13 @@ class SA3Engine:
     # ── inference ─────────────────────────────────────────────────────────
     def transform(self, audio: np.ndarray, prompt: str, strength: float, seed: int, *,
                   negative: str | None = None, cfg: float = 1.0, match_rms: bool | None = None,
-                  schedule: str | None = None, latents: int | None = None) -> tuple[np.ndarray, dict]:
+                  schedule: str | None = None, latents: int | None = None,
+                  steps: int | None = None) -> tuple[np.ndarray, dict]:
         """Noise the input to σ and sample down from there (SDEdit: the input survives only in the starting point).
         CFG runs only when `negative` is non-empty and cfg != 1 (one batch-2 DiT pass per step, ~1.6× sampling
         time); otherwise it costs nothing. Other keyword args override the constructor defaults for this call only."""
         schedule = schedule or self.schedule
+        steps = steps or self.steps  # of a full-strength run; the part below σ runs (more: a finer rebuild, slower)
         if schedule not in _SCHEDULES:
             raise ValueError(f"schedule must be one of {_SCHEDULES}, got {schedule!r}")
         match_rms = self.match_rms if match_rms is None else match_rms
@@ -233,7 +235,7 @@ class SA3Engine:
 
         pure = mx.random.normal((1, 256, T), dtype=mx.float16, key=mx.random.key(seed))
         noise = orig.astype(mx.float16) * (1.0 - sigma) + pure * sigma
-        sigmas = self._sigmas(sigma, schedule)
+        sigmas = self._sigmas(sigma, schedule, steps)
         gen = f["sample_flow_pingpong"](self._model_fn(cross, glob, neg, cfg), noise, sigmas, seed=seed + 1)
         mx.eval(gen)
         steps_run = int(sigmas.shape[0]) - 1
@@ -260,7 +262,7 @@ class SA3Engine:
         t["limited_frac"] = float(np.mean(np.abs(y) > _KNEE))
         y = _soft_limit(y)
         t["out_peak"], t["out_rms"] = _stats(y)
-        t["sigma"], t["seed"], t["steps"], t["latents"] = sigma, seed, self.steps, T
+        t["sigma"], t["seed"], t["steps"], t["latents"] = sigma, seed, steps, T
         t["steps_run"], t["schedule"], t["cfg"] = steps_run, schedule, cfg if use_cfg else 1.0
         t["total"] = (time.perf_counter() - t_start) * 1000
         return y.astype(np.float32, copy=False), t

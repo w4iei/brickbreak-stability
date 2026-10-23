@@ -106,7 +106,7 @@ export function makeFromTexts(
   board: PaletteBrick[],
   color?: string,
   id = Math.max(FIRST_ID - 1, ...board.map((b) => b.id)) + 1,
-  dial: { strength?: number; push?: number } = {}, // its own σ and push (else the settings')
+  dial: { strength?: number; push?: number; steps?: number } = {}, // its own σ, push and steps (else the settings')
 ): PaletteBrick {
   const words = fillTrack(prompt, '');
   return {
@@ -123,6 +123,7 @@ export function makeFromTexts(
     listen: [words],
     ...(dial.strength !== undefined ? { strength: dial.strength } : {}),
     ...(dial.push !== undefined ? { push: dial.push } : {}),
+    ...(dial.steps && dial.steps !== DEFAULT_STEPS ? { steps: dial.steps } : {}),
   };
 }
 
@@ -135,7 +136,7 @@ const CSS = `
 .site-form .pair { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
 .site-form input[type="color"] { width: 54px; height: 42px; padding: 4px; cursor: pointer; }
 .site-form .hint { margin: -2px 0 0; font-size: 12.5px; color: var(--muted); }
-.site-form .dials { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.site-form .dials { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .site-form input[type="range"] { padding: 0; accent-color: var(--accent); }
 .site-form .dials output { color: var(--fg); font-variant-numeric: tabular-nums; }
 .site-form .hint code { color: var(--fg); }
@@ -149,6 +150,7 @@ const CSS = `
 `;
 
 const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+const DEFAULT_STEPS = 8; // the server's
 const TRACK = '{track}, ';
 const OWN = 'own'; // the push text is the user's own, not an emotion's
 const ITSELF = 'track'; // pushed away from the track as it is: the push then leans on exactly the words added
@@ -184,8 +186,9 @@ export function createEmotionCard(d: {
       <div class="dials">
         <label>Strength <output data-k="sOut"></output><input type="range" data-k="strength" min="0.5" max="1" step="0.01" /></label>
         <label>Push <output data-k="pOut"></output><input type="range" data-k="push" min="1" max="6" step="0.1" /></label>
+        <label>Steps <output data-k="nOut"></output><input type="range" data-k="steps" min="8" max="32" step="4" /></label>
       </div>
-      <p class="hint">Strength is how much of the original is replaced: about 0.75 changes the mood and keeps the track; an instrument it doesn't have needs 0.85 or more. Push is how hard it leans away from the second text; away from <i>the track as it is</i>, it leans on exactly the words you added.</p>
+      <p class="hint">Strength is how much of the original is replaced: about 0.75 changes the mood and keeps the track; an instrument it doesn't have needs 0.85 or more. Push is how hard it leans away from the second text; away from <i>the track as it is</i>, it leans on exactly the words you added. More steps rebuild new parts more finely, and take longer.</p>
       <p class="site-prompt" data-k="preview"></p>
       <p class="err" data-k="err"></p>
       <div class="go"><button class="big" type="submit" data-k="save">Add</button><button type="button" data-k="close">Close</button></div>
@@ -201,6 +204,7 @@ export function createEmotionCard(d: {
   const colour = $<HTMLInputElement>('colour');
   const strength = $<HTMLInputElement>('strength');
   const push = $<HTMLInputElement>('push');
+  const steps = $<HTMLInputElement>('steps');
   const err = $('err');
   let editing: PaletteBrick | undefined; // the one being changed, else a new one
   sheet.addEventListener('click', (e) => e.target === sheet && (sheet.hidden = true));
@@ -216,11 +220,12 @@ export function createEmotionCard(d: {
     const [p, n] = [fillTrack(prompt.value, src), fillTrack(negative.value, src)];
     $('sOut').textContent = Number(strength.value).toFixed(2);
     $('pOut').textContent = Number(push.value).toFixed(1);
+    $('nOut').textContent = steps.value;
     $('preview').innerHTML =
       `<b>Prompt:</b> “${esc(p || '…')}”<br><b>Away from:</b> ${n ? `“${esc(n)}”` : 'nothing'}` +
-      `<br><b>Strength</b> ${Number(strength.value).toFixed(2)} · <b>push</b> ${n ? Number(push.value).toFixed(1) : 'none'}`;
+      `<br><b>Strength</b> ${Number(strength.value).toFixed(2)} · <b>push</b> ${n ? Number(push.value).toFixed(1) : 'none'} · <b>steps</b> ${steps.value}`;
   }
-  [prompt, strength, push].forEach((el) => el.addEventListener('input', preview));
+  [prompt, strength, push, steps].forEach((el) => el.addEventListener('input', preview));
   negative.addEventListener('input', () => {
     const t = negative.value.trim();
     opposite.value = !t ? '' : t === '{track}' ? ITSELF : negative.value === choiceText(opposite.value) ? opposite.value : OWN;
@@ -253,6 +258,7 @@ export function createEmotionCard(d: {
     const def = d.defaults();
     strength.value = String(b?.strength ?? def.strength);
     push.value = String(b?.push ?? def.push);
+    steps.value = String(b?.steps ?? DEFAULT_STEPS);
     err.textContent = '';
     $('mine').innerHTML = d
       .mine()
@@ -284,6 +290,7 @@ export function createEmotionCard(d: {
     const b = makeFromTexts(label, prompt.value, negative.value, opp?.id, d.board(), colour.value, editing?.id, {
       strength: Number(strength.value),
       push: Number(push.value),
+      steps: Number(steps.value),
     });
     const here = editing ? d.mine().map((x) => (x.id === editing!.id ? b : x)) : [...d.mine(), b];
     sheet.hidden = true;

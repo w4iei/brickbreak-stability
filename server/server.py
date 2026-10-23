@@ -204,6 +204,7 @@ class Transform(BaseModel):
     strength: float = 0.5  # σ
     seed: int = 0
     seconds: float | None = None  # render length; the engine's chunk when omitted
+    steps: int | None = None  # denoising steps of a full-strength run (the engine's, 8, when omitted); σ 0.85 runs ~half
 
 
 # ── render cache: every render is kept on disk, so a track can be pre-rendered and then played with no GPU work ──
@@ -219,7 +220,7 @@ live = {"pending": 0}  # requested renders queued or running; a pre-render waits
 def render_file(r: Transform) -> Path:
     st = track_path(r.track).stat()
     use_cfg = bool(r.negative) and r.cfg != 1
-    spec = [CACHE_VERSION, engine.name, engine.steps, engine.schedule, engine.match_rms, r.track, st.st_size, int(st.st_mtime),
+    spec = [CACHE_VERSION, engine.name, r.steps or engine.steps, engine.schedule, engine.match_rms, r.track, st.st_size, int(st.st_mtime),
             round(max(0.0, r.start), 4), latents_for(r.seconds), r.prompt, r.negative if use_cfg else None,
             round(r.cfg, 4) if use_cfg else 1.0, round(min(max(r.strength, 0.05), 1.0), 4), r.seed, 0.0]  # 0.0: no blend
     return RENDERS / Path(r.track).stem / f"{hashlib.blake2b(json.dumps(spec).encode(), digest_size=16).hexdigest()}.ogg"
@@ -248,7 +249,7 @@ def render(r: Transform) -> tuple[np.ndarray, dict]:
     if not state["ready"]:
         return audio, {"total": (time.perf_counter() - t) * 1000, "passthrough": True}
     neg = r.negative if r.cfg != 1 else None
-    return engine.transform(audio, r.prompt, r.strength, r.seed, negative=neg, cfg=r.cfg, latents=n)
+    return engine.transform(audio, r.prompt, r.strength, r.seed, negative=neg, cfg=r.cfg, latents=n, steps=r.steps)
 
 
 # ── the versions' envelopes, from their renders on disk: the Listen tab asks while a new emotion pre-renders, so its
