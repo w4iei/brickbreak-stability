@@ -136,6 +136,29 @@ def analysis(name: str) -> FileResponse | Response:
     return FileResponse(p, media_type="application/json", headers={"Cache-Control": "no-cache"})
 
 
+# ── emotions made with New emotion: kept here, so every browser on this computer sees the same ones
+EMOTIONS = Path(os.environ.get("EMOTIONS_FILE", HERE / "emotions.json"))
+
+
+@app.get("/api/emotions")
+def get_emotions() -> list[dict]:
+    try:
+        return json.loads(EMOTIONS.read_text()) if EMOTIONS.is_file() else []
+    except ValueError:
+        return []
+
+
+@app.put("/api/emotions")
+def put_emotions(bricks: list[dict]) -> dict:
+    for b in bricks:
+        if not isinstance(b.get("id"), int) or not str(b.get("label", "")).strip() or not str(b.get("feel", "")).strip():
+            raise HTTPException(400, "each emotion needs an id, a label and words")
+    tmp = EMOTIONS.with_suffix(".part")
+    tmp.write_text(json.dumps(bricks, indent=1, ensure_ascii=False))
+    os.replace(tmp, EMOTIONS)
+    return {"ok": True, "count": len(bricks)}
+
+
 @app.get("/api/envelope/{name:path}")
 def envelope(name: str) -> dict:
     """The original's loudness envelope for the Listen tab, in site/envelopes.py's format (bytes of (dBFS + 60) × 4 per

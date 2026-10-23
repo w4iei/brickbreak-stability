@@ -787,6 +787,9 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
     get duration() {
       return track?.duration;
     },
+    get source() {
+      return track?.source ?? ''; // what the track is, as every prompt begins
+    },
     // Every chunk of every version of this track, as the server renders it (offline: the Listen tab's envelopes, from
     // the renders on its disk).
     versionChunks() {

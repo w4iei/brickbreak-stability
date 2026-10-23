@@ -1,8 +1,9 @@
 import type { PaletteBrick } from './palette.ts';
 
 // Offline only: emotions made on this computer. Each is a brick like the palette's own (a name, the words Stable
-// Audio is steered toward, an opposite it is pushed away from), added at the end of the row, kept in this browser.
-// Its renders are made by the local server as it plays, like any other brick's.
+// Audio is steered toward, an opposite it is pushed away from), added at the end of the row. They are kept by the local
+// server (server/emotions.json), so every browser on this computer has the same ones, and in this browser as a
+// fallback. Their renders are made by the local server as they play, like any other brick's.
 
 const KEY = 'brickbreak.emotions';
 const FIRST_ID = 100; // above every palette's ids
@@ -10,12 +11,28 @@ const MAX_LABEL = 12; // characters: it has to fit on a brick
 // Colours for new bricks, clear of the palette's own (taken in order, skipping any already on the board).
 const COLOURS = ['#ffb347', '#8be04e', '#5b8cff', '#ffd84d', '#4dd0a1', '#c792ea', '#ff7a59', '#4fc3f7'];
 
-export function loadEmotions(): PaletteBrick[] {
+const valid = (v: unknown): PaletteBrick[] =>
+  Array.isArray(v) ? v.filter((b) => b && typeof b.id === 'number' && b.label && b.feel) : [];
+
+function loadLocal(): PaletteBrick[] {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? '[]') as PaletteBrick[];
-    return Array.isArray(v) ? v.filter((b) => b && typeof b.id === 'number' && b.label && b.feel) : [];
+    return valid(JSON.parse(localStorage.getItem(KEY) ?? '[]'));
   } catch {
-    return []; // storage blocked or unreadable: start empty
+    return []; // storage blocked or unreadable
+  }
+}
+
+// The server's list; this browser's own when the server has none yet (and then the server gets it).
+export async function loadEmotions(): Promise<PaletteBrick[]> {
+  const local = loadLocal();
+  try {
+    const r = await fetch('/api/emotions');
+    const mine = r.ok ? valid(await r.json()) : [];
+    if (mine.length || !local.length) return mine;
+    saveEmotions(local);
+    return local;
+  } catch {
+    return local; // no server: what this browser kept
   }
 }
 
@@ -23,8 +40,11 @@ function saveEmotions(list: PaletteBrick[]) {
   try {
     localStorage.setItem(KEY, JSON.stringify(list));
   } catch {
-    /* storage blocked: they last until the page is closed */
+    /* storage blocked */
   }
+  void fetch('/api/emotions', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(list) }).catch(
+    (err) => console.warn('Emotions not saved on the server:', err),
+  );
 }
 
 // The colour a new brick gets unless one is picked: the first of COLOURS not already on the board.
@@ -75,6 +95,7 @@ export interface EmotionCard {
 export function createEmotionCard(d: {
   board(): PaletteBrick[]; // every brick on the board now
   mine(): PaletteBrick[]; // the ones made here
+  source(): string; // what the playing track is, as the prompts begin (its sound tags and tempo)
   onChange(list: PaletteBrick[]): void; // the new list of the ones made here
 }): EmotionCard {
   const style = document.createElement('style');
@@ -90,6 +111,7 @@ export function createEmotionCard(d: {
       <label>Name<input data-k="name" maxlength="${MAX_LABEL}" placeholder="NOSTALGIA" autocomplete="off" required /></label>
       <label>Words<input data-k="words" placeholder="nostalgic, wistful, warm, hazy" autocomplete="off" required /></label>
       <div class="pair"><label>Away from<select data-k="opposite"></select></label><label>Colour<input type="color" data-k="colour" /></label></div>
+      <p class="site-prompt" data-k="preview"></p>
       <p class="err" data-k="err"></p>
       <div class="go"><button class="big" type="submit">Add</button><button type="button" data-k="close">Close</button></div>
     </form>
@@ -99,6 +121,15 @@ export function createEmotionCard(d: {
   const $ = <T extends HTMLElement>(k: string) => sheet.querySelector<T>(`[data-k="${k}"]`)!;
   const [name, words, opposite, colour, err] = [$<HTMLInputElement>('name'), $<HTMLInputElement>('words'), $<HTMLSelectElement>('opposite'), $<HTMLInputElement>('colour'), $('err')];
   sheet.addEventListener('click', (e) => e.target === sheet && (sheet.hidden = true));
+  // The texts Stable Audio gets, as they will be sent: the track as it is, then these words; pushed away from the same
+  // track with the opposite's words.
+  function preview() {
+    const on = (w: string) => [d.source(), w.trim()].filter(Boolean).join(', ');
+    const opp = d.board().find((b) => String(b.id) === opposite.value);
+    $('preview').innerHTML =
+      `<b>Prompt:</b> “${esc(on(words.value || '…'))}”` + (opp ? `<br><b>Away from:</b> “${esc(on(opp.feel))}”` : '');
+  }
+  [words, opposite].forEach((el) => el.addEventListener('input', preview));
   $('close').addEventListener('click', () => (sheet.hidden = true));
 
   function show() {
@@ -109,6 +140,7 @@ export function createEmotionCard(d: {
       .mine()
       .map((b) => `<div><b style="color:${b.color}">${esc(b.label)}</b><span>${esc(b.feel)}</span><button type="button" data-remove="${b.id}">Remove</button></div>`)
       .join('');
+    preview();
   }
   $('mine').addEventListener('click', (e) => {
     const id = Number((e.target as HTMLElement).dataset.remove);

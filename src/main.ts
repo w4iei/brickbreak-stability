@@ -26,7 +26,7 @@ const STATS_WINDOW_MS = 1000;
 const DEBUG_LOG_SIZE = 500;
 
 const PADDLE = 1.0; // m, half width: wide enough for thumbs (and wider still on a wider field)
-const sim: SimParams = { ...DEFAULT_PARAMS, paddle: PADDLE, extra: STATIC ? [] : loadEmotions() };
+const sim: SimParams = { ...DEFAULT_PARAMS, paddle: PADDLE, extra: STATIC ? [] : await loadEmotions() };
 const board = () => paletteOf(sim);
 const output: OutputState = { midiId: '', latencyMs: Object.fromEntries(Array.from({ length: 16 }, (_, ch) => [ch, 0])) };
 const stats: Stats = { headroomMs: 0, late: 0, slowFrames: 0 };
@@ -229,6 +229,7 @@ const emotions = STATIC
   : createEmotionCard({
       board: () => board().bricks,
       mine: () => sim.extra,
+      source: () => player.source,
       onChange(list) {
         sim.extra = list;
         if (states.active !== undefined && !brickById(board(), states.active)) clearState(); // the one playing went
@@ -267,6 +268,7 @@ const listen = createListenView(board().bricks, loadEnvelope, {
   onPlay: playListen,
   onNext: () => void player.next(),
   onPrefetch: (id) => player.prefetch(id),
+  onAdd: emotions && (() => emotions.open()),
 });
 function setListen(on: boolean) {
   if (on === listening) return;

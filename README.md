@@ -26,8 +26,9 @@ the ADE 2026 hackathon on Blaine's physics sequencer ([Fenrir Labs](https://gith
 - **The public site** plays pre-rendered files. No model and no server: it runs on any phone.
 - **Offline**, on a Mac with Apple silicon, the music is rendered on your computer as you play. You can change the
   strength and push, send each emotion out as a MIDI note, and add your own emotions (menu → New emotion: a name, a
-  few words, what it moves away from and a colour). A new emotion renders in the background (about a minute a track)
-  and its Listen lane fills in as it does.
+  few words, what it moves away from and a colour; or + New emotion under the Listen lanes). The card shows the exact
+  prompt as you type. A new emotion renders in the background (about a minute a track) and its Listen lane fills in as
+  it does. The local server keeps your emotions (server/emotions.json), so every browser on the Mac has them.
 
 ## Run it offline
 

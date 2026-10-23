@@ -16,6 +16,7 @@ export interface ListenDeps {
   onPlay(): void; // play / pause
   onNext(): void;
   onPrefetch(id: number): void; // the pointer is over a version
+  onAdd?(): void; // offline: the New emotion card (a row under the lanes)
 }
 
 export interface ListenView {
@@ -64,6 +65,9 @@ const CSS = `
 .ls-ghost { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: rgba(238, 242, 246, 0.45); pointer-events: none; }
 .ls-ghost[hidden] { display: none; }
 .ls-ghost .ls-tip { background: var(--panel); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+.site button.ls-add { flex: none; width: 100%; max-width: 1280px; margin-inline: auto; padding: 8px 14px; border-radius: 12px; border: 1px dashed var(--line); background: none; color: var(--muted); font-weight: 600; text-align: left; }
+.site button.ls-add:hover { color: var(--fg); border-color: var(--muted); }
+.site button.ls-add-icon { display: none; font-size: 20px; }
 .ls-foot { flex: none; display: grid; justify-items: center; gap: 10px; }
 .ls-how { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; }
 .ls-transport { display: flex; align-items: center; gap: 24px; }
@@ -74,6 +78,8 @@ const CSS = `
   .ls-stage, .ls-lanes { gap: 4px; }
   .ls-foot { align-content: center; }
   .ls-how { display: none; }
+  .site button.ls-add { display: none; }
+  .site button.ls-add-icon { display: grid; }
   .ls-transport { flex-direction: column; gap: 10px; }
   .site button.ls-play { width: 52px; height: 52px; box-shadow: none; }
 }
@@ -111,12 +117,14 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
       <div class="ls-ghost" data-k="ghost" hidden><span class="ls-tip" data-k="ghostTip"></span></div>
       <div class="ls-head" data-k="head"><span class="ls-tip" data-k="tip" hidden></span></div>
     </div>
+    <button class="ls-add" data-k="add" hidden>+ New emotion</button>
     <div class="ls-foot">
       <p class="ls-how">Tap a name to switch version. Tap or drag on a version to jump there.</p>
       <div class="ls-transport">
         <button class="icon" data-k="start" aria-label="Back to the start">${ICON.start}</button>
         <button class="ls-play" data-k="play" aria-label="Play">${ICON.play}</button>
         <button class="icon" data-k="next" aria-label="Next track">${ICON.next}</button>
+        <button class="icon ls-add-icon" data-k="addIcon" aria-label="New emotion" hidden>+</button>
       </div>
     </div>`;
   document.body.append(root);
@@ -311,6 +319,11 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
   $('play').addEventListener('click', () => d.onPlay());
   $('start').addEventListener('click', () => d.onSeek(0));
   $('next').addEventListener('click', () => d.onNext());
+  for (const k of ['add', 'addIcon'])
+    if (d.onAdd) {
+      $(k).hidden = false;
+      $(k).addEventListener('click', () => d.onAdd!());
+    } else $(k).remove();
 
   let shown: { active?: number; pending?: boolean; paused?: boolean } = {};
   return {

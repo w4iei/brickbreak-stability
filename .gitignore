@@ -11,6 +11,7 @@ tracks/*
 !tracks/README.md
 site/public/audio
 server/cache/
+server/emotions.json
 analysis/out/
 analysis/cache/
 
