@@ -184,6 +184,7 @@ function frame() {
     if (t.name !== shownTrack) {
       site.setTrack(t.title ?? t.name.replace(/\.[^.]+$/, ''), t.artist ?? '');
       listen.setTrack(STATIC ? t.slug ?? '' : t.name, t.duration);
+      complete = new Set(); // its lanes start empty: every version is asked for again
     }
     shownTrack = t.name;
     site.setProgress(player.trackPos(now) ?? 0, t.duration);
