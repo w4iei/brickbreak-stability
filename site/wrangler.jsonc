@@ -1,0 +1,12 @@
+// klavecimbel.com/brickbreak: the breakout as a static site (no Worker code). `npm run build:site` makes ./dist, whose
+// brickbreak/ folder holds the game and its pre-rendered audio, so the route's paths map onto it as they are.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "brickbreak",
+  "compatibility_date": "2026-10-21",
+  "assets": {
+    "directory": "./dist"
+  },
+  // Only /brickbreak… on the zone: the rest of klavecimbel.com is served as before.
+  "routes": [{ "pattern": "klavecimbel.com/brickbreak*", "zone_name": "klavecimbel.com" }]
+}

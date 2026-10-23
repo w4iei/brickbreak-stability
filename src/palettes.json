@@ -1,0 +1,411 @@
+{
+  "emotions": {
+    "name": "Emotions",
+    "bricks": [
+      {
+        "id": 1,
+        "label": "TRUE LOVE",
+        "pole": "light",
+        "opposite": 7,
+        "note": 60,
+        "color": "#f2a7b8",
+        "prompt": "tender romantic soul ballad, lush warm strings, glowing Rhodes piano, soft swelling choir, major key, intimate and devoted",
+        "feel": "tender, devoted, warm and loving, intimate, major key",
+        "listen": [
+          "music that feels like true love",
+          "tender, devoted and loving",
+          "warm, intimate and adoring",
+          "the feeling of being deeply in love"
+        ]
+      },
+      {
+        "id": 2,
+        "label": "DESPAIR",
+        "pole": "dark",
+        "opposite": 8,
+        "note": 49,
+        "color": "#3d4654",
+        "prompt": "bleak dark ambient drone, crushing low distorted strings, hollow empty reverb, funereal minor chords, hopeless and heavy",
+        "feel": "hopeless, bleak, crushing, heavy, minor key",
+        "listen": [
+          "music that feels like despair",
+          "hopeless, bleak and crushing",
+          "utterly without hope",
+          "the feeling of giving up on everything"
+        ]
+      },
+      {
+        "id": 3,
+        "label": "SERENITY",
+        "pole": "light",
+        "opposite": 9,
+        "note": 62,
+        "color": "#9fe0d6",
+        "prompt": "serene ambient music, soft warm pads, gentle harp, slow breathing textures, weightless, peaceful and calm",
+        "feel": "serene, calm, peaceful, still, weightless",
+        "listen": [
+          "music that feels serene",
+          "calm, peaceful and still",
+          "tranquil and at rest",
+          "the feeling of complete peace"
+        ]
+      },
+      {
+        "id": 4,
+        "label": "GRIEF",
+        "pole": "dark",
+        "opposite": 10,
+        "note": 51,
+        "color": "#33306b",
+        "prompt": "mournful funeral elegy, solemn low brass choir, slow tolling bells, dark minor key, grieving and sorrowful",
+        "feel": "grieving, mournful, solemn, sorrowful, slow, minor key",
+        "listen": [
+          "music that feels like grief",
+          "mournful and sorrowful",
+          "solemn mourning for the dead",
+          "the feeling of losing someone forever"
+        ]
+      },
+      {
+        "id": 5,
+        "label": "SAFETY",
+        "pole": "light",
+        "opposite": 11,
+        "note": 64,
+        "color": "#f2c27b",
+        "prompt": "cozy warm lo-fi, soft muted piano, mellow round bass, gentle vinyl crackle, comforting and safe like a warm blanket",
+        "feel": "comforting, safe, gentle, cozy, reassuring",
+        "listen": [
+          "music that feels safe",
+          "comforting and reassuring",
+          "gentle, cozy and protected",
+          "the feeling of being held and kept safe"
+        ]
+      },
+      {
+        "id": 6,
+        "label": "BETRAYAL",
+        "pole": "dark",
+        "opposite": 12,
+        "note": 53,
+        "color": "#5b2a6e",
+        "prompt": "cold sinister trip-hop, menacing detuned synths, creeping bassline, paranoid and bitter, dark minor key",
+        "feel": "bitter, sinister, cold, paranoid, menacing, minor key",
+        "listen": [
+          "music that feels like betrayal",
+          "bitter, cold and sinister",
+          "paranoid and distrustful",
+          "the feeling of being stabbed in the back"
+        ]
+      },
+      {
+        "id": 7,
+        "label": "HEARTBREAK",
+        "pole": "dark",
+        "opposite": 1,
+        "note": 48,
+        "color": "#9b1c31",
+        "prompt": "heartbroken slow ballad, lonely solo piano and weeping cello, sparse and aching, minor key, fragile, reverb-soaked tears",
+        "feel": "heartbroken, aching, fragile, tearful, slow, minor key",
+        "listen": [
+          "music that feels heartbroken",
+          "aching, fragile and tearful",
+          "longing for a lost love",
+          "the feeling of a broken heart"
+        ]
+      },
+      {
+        "id": 8,
+        "label": "HOPE",
+        "pole": "light",
+        "opposite": 2,
+        "note": 61,
+        "color": "#ffd76a",
+        "prompt": "hopeful sunrise anthem, shimmering guitars, rising bright major chords, uplifting piano, light breaking through",
+        "feel": "hopeful, rising, bright, uplifting, major key",
+        "listen": [
+          "music that feels hopeful",
+          "uplifting, bright and rising",
+          "optimistic and looking forward",
+          "the feeling of light breaking through"
+        ]
+      },
+      {
+        "id": 9,
+        "label": "RAGE",
+        "pole": "dark",
+        "opposite": 3,
+        "note": 50,
+        "color": "#e0401f",
+        "prompt": "furious industrial metal, distorted down-tuned guitars, pounding aggressive drums, harsh noise, relentless and violent",
+        "feel": "furious, violent, aggressive, relentless, harsh",
+        "listen": [
+          "music that feels like rage",
+          "furious, violent and aggressive",
+          "angry and relentless",
+          "the feeling of uncontrollable anger"
+        ]
+      },
+      {
+        "id": 10,
+        "label": "EUPHORIA",
+        "pole": "light",
+        "opposite": 4,
+        "note": 63,
+        "color": "#ff5fd2",
+        "prompt": "euphoric festival trance, soaring supersaw leads, massive four-on-the-floor kick, hands-in-the-air drop, ecstatic and bright",
+        "feel": "euphoric, ecstatic, exhilarated, soaring, bright",
+        "listen": [
+          "music that feels euphoric",
+          "ecstatic and exhilarated",
+          "overwhelming joy, soaring",
+          "the feeling of pure bliss"
+        ]
+      },
+      {
+        "id": 11,
+        "label": "TERROR",
+        "pole": "dark",
+        "opposite": 5,
+        "note": 52,
+        "color": "#2f4a2a",
+        "prompt": "horror film score, screeching dissonant strings, sub-bass rumble, sudden violent stabs, terrifying nightmare",
+        "feel": "terrifying, panicked, nightmarish, dissonant, sudden stabs",
+        "listen": [
+          "music that feels terrifying",
+          "panic and horror",
+          "nightmarish and frightening",
+          "the feeling of being hunted"
+        ]
+      },
+      {
+        "id": 12,
+        "label": "FORGIVENESS",
+        "pole": "light",
+        "opposite": 6,
+        "note": 65,
+        "color": "#cfe3ff",
+        "prompt": "gentle gospel, soft organ and warm choir, acoustic guitar, release and redemption, peaceful resolution, major key",
+        "feel": "forgiving, gentle, warm, redemptive, peaceful resolution, major key",
+        "listen": [
+          "music that feels like forgiveness",
+          "gentle release and redemption",
+          "peaceful reconciliation",
+          "the feeling of letting go of a wrong"
+        ]
+      },
+      {
+        "id": 13,
+        "label": "TRIUMPH",
+        "pole": "light",
+        "opposite": 14,
+        "note": 67,
+        "color": "#f5b301",
+        "prompt": "triumphant epic orchestra, heroic brass fanfare, thundering timpani, victorious choir, huge cinematic climax",
+        "feel": "triumphant, victorious, heroic, majestic, climactic",
+        "listen": [
+          "music that feels triumphant",
+          "victorious and heroic",
+          "glorious and majestic",
+          "the feeling of winning against all odds"
+        ]
+      },
+      {
+        "id": 14,
+        "label": "DEFEAT",
+        "pole": "dark",
+        "opposite": 13,
+        "note": 55,
+        "color": "#6b6359",
+        "prompt": "defeated slow collapse, warped detuned tape strings, falling pitch, exhausted and broken, heavy and grey",
+        "feel": "defeated, exhausted, broken, collapsing, heavy",
+        "listen": [
+          "music that feels like defeat",
+          "exhausted, broken and beaten",
+          "collapsing and resigned",
+          "the feeling of having lost everything"
+        ]
+      },
+      {
+        "id": 15,
+        "label": "WONDER",
+        "pole": "light",
+        "opposite": 16,
+        "note": 68,
+        "color": "#7fe7ff",
+        "prompt": "magical wonder, sparkling celesta and glockenspiel, airy choir, shimmering harp arpeggios, awe and enchantment",
+        "feel": "wondrous, magical, awestruck, enchanted, shimmering",
+        "listen": [
+          "music that feels full of wonder",
+          "magical and enchanting",
+          "awe and amazement",
+          "the feeling of seeing something miraculous"
+        ]
+      },
+      {
+        "id": 16,
+        "label": "DREAD",
+        "pole": "dark",
+        "opposite": 15,
+        "note": 56,
+        "color": "#2b1d3a",
+        "prompt": "creeping dread, low droning cello, ticking clock, slow building tension, ominous dark synth, something is coming",
+        "feel": "ominous, tense, foreboding, creeping, slowly building",
+        "listen": [
+          "music that feels like dread",
+          "ominous and foreboding",
+          "creeping tension, something is coming",
+          "the feeling of fearing what comes next"
+        ]
+      },
+      {
+        "id": 17,
+        "label": "BELONGING",
+        "pole": "light",
+        "opposite": 18,
+        "note": 66,
+        "color": "#ff9a4d",
+        "prompt": "joyful folk singalong, stomping claps, many voices together, acoustic guitars and fiddle, warm community, home",
+        "feel": "warm, communal, joyful, welcoming, together",
+        "listen": [
+          "music that feels like belonging",
+          "warm, communal and together",
+          "welcomed home among friends",
+          "the feeling of being part of something"
+        ]
+      },
+      {
+        "id": 18,
+        "label": "LONELINESS",
+        "pole": "dark",
+        "opposite": 17,
+        "note": 54,
+        "color": "#4a6a8a",
+        "prompt": "lonely late-night city, distant muted trumpet, soft rain, sparse echoing piano, isolated and empty",
+        "feel": "lonely, isolated, empty, distant, sparse",
+        "listen": [
+          "music that feels lonely",
+          "isolated, empty and distant",
+          "alone at night",
+          "the feeling of having no one"
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "site": {
+    "name": "Six emotions + original",
+    "version": 2,
+    "layout": "listed",
+    "bricks": [
+      {
+        "id": 4,
+        "label": "GRIEF",
+        "pole": "dark",
+        "opposite": 10,
+        "note": 51,
+        "color": "#33306b",
+        "prompt": "mournful funeral elegy, solemn low brass choir, slow tolling bells, dark minor key, grieving and sorrowful",
+        "feel": "grieving, mournful, solemn, sorrowful, slow, minor key",
+        "listen": [
+          "music that feels like grief",
+          "mournful and sorrowful",
+          "solemn mourning for the dead",
+          "the feeling of losing someone forever"
+        ]
+      },
+      {
+        "id": 9,
+        "label": "RAGE",
+        "pole": "dark",
+        "opposite": 3,
+        "note": 50,
+        "color": "#e0401f",
+        "prompt": "furious industrial metal, distorted down-tuned guitars, pounding aggressive drums, harsh noise, relentless and violent",
+        "feel": "furious, violent, aggressive, relentless, harsh",
+        "listen": [
+          "music that feels like rage",
+          "furious, violent and aggressive",
+          "angry and relentless",
+          "the feeling of uncontrollable anger"
+        ]
+      },
+      {
+        "id": 16,
+        "label": "DREAD",
+        "pole": "dark",
+        "opposite": 15,
+        "note": 56,
+        "color": "#2b1d3a",
+        "prompt": "creeping dread, low droning cello, ticking clock, slow building tension, ominous dark synth, something is coming",
+        "feel": "ominous, tense, foreboding, creeping, slowly building",
+        "listen": [
+          "music that feels like dread",
+          "ominous and foreboding",
+          "creeping tension, something is coming",
+          "the feeling of fearing what comes next"
+        ]
+      },
+      {
+        "id": 0,
+        "label": "ORIGINAL",
+        "pole": "neutral",
+        "opposite": 0,
+        "note": 60,
+        "color": "#c9d4df",
+        "prompt": "",
+        "feel": "",
+        "listen": [],
+        "original": true
+      },
+      {
+        "id": 15,
+        "label": "WONDER",
+        "pole": "light",
+        "opposite": 16,
+        "note": 68,
+        "color": "#7fe7ff",
+        "prompt": "magical wonder, sparkling celesta and glockenspiel, airy choir, shimmering harp arpeggios, awe and enchantment",
+        "feel": "wondrous, magical, awestruck, enchanted, shimmering",
+        "listen": [
+          "music that feels full of wonder",
+          "magical and enchanting",
+          "awe and amazement",
+          "the feeling of seeing something miraculous"
+        ]
+      },
+      {
+        "id": 3,
+        "label": "SERENITY",
+        "pole": "light",
+        "opposite": 9,
+        "note": 62,
+        "color": "#9fe0d6",
+        "prompt": "serene ambient music, soft warm pads, gentle harp, slow breathing textures, weightless, peaceful and calm",
+        "feel": "serene, calm, peaceful, still, weightless",
+        "listen": [
+          "music that feels serene",
+          "calm, peaceful and still",
+          "tranquil and at rest",
+          "the feeling of complete peace"
+        ]
+      },
+      {
+        "id": 10,
+        "label": "EUPHORIA",
+        "pole": "light",
+        "opposite": 4,
+        "note": 63,
+        "color": "#ff5fd2",
+        "prompt": "euphoric festival trance, soaring supersaw leads, massive four-on-the-floor kick, hands-in-the-air drop, ecstatic and bright",
+        "feel": "euphoric, ecstatic, exhilarated, soaring, bright",
+        "listen": [
+          "music that feels euphoric",
+          "ecstatic and exhilarated",
+          "overwhelming joy, soaring",
+          "the feeling of pure bliss"
+        ]
+      }
+    ]
+  }
+}

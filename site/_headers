@@ -1,0 +1,9 @@
+# Cache rules for the static assets (copied to dist/ by `npm run build:site`).
+# Vite's built files carry content hashes: keep them for a year.
+/brickbreak/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+# The audio is renamed by nothing when re-exported, so a day; the manifest is always checked.
+/brickbreak/audio/*
+  Cache-Control: public, max-age=86400
+/brickbreak/audio/manifest.json
+  Cache-Control: no-cache

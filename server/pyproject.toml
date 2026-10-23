@@ -1,0 +1,19 @@
+[project]
+name = "brick-breaker-audio"
+version = "0.1.0"
+description = "Track server + Stable Audio 3 (MLX) audio-to-audio transforms for the brick-breaker"
+requires-python = ">=3.10"
+dependencies = [
+    # Runtime deps of stable-audio-3/optimized/mlx (see its requirements.txt)
+    "mlx>=0.30",
+    "numpy>=1.24",
+    "sentencepiece>=0.2",
+    "huggingface_hub>=0.20",
+    "soundfile>=0.12",
+    # HTTP
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[tool.uv]
+package = false

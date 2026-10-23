@@ -1,0 +1,9 @@
+{
+  "//": "The tracks on the public site: a file in tracks/ and how the site names it. export.py renders and exports these.",
+  "tracks": [
+    {"file": "KUNAKBAEVA - ATARI 3.0 FINAL MST.wav", "slug": "atari", "title": "ATARI 3.0", "artist": "Yana Kunakbaeva",
+     "artistUrl": "https://soundcloud.com/kunakbaeva"},
+    {"file": "KUNAKBAEVA -MID-AIR FINAL MST.wav", "slug": "mid-air", "title": "MID-AIR", "artist": "Yana Kunakbaeva",
+     "artistUrl": "https://soundcloud.com/kunakbaeva"}
+  ]
+}

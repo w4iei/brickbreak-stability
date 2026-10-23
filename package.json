@@ -1,0 +1,29 @@
+{
+  "name": "brickbreak",
+  "version": "1.0.0",
+  "description": "Brick Breaker × Stable Audio: hit a brick and the track turns into that emotion, on the beat.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "uv run --project server python server/server.py",
+    "typecheck": "tsc",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "build:site": "tsc && vite build --mode site && cp site/_headers site/dist/_headers",
+    "preview:site": "wrangler dev --config site/wrangler.jsonc --ip 0.0.0.0 --port 8787",
+    "deploy:site": "npm run build:site && wrangler deploy --config site/wrangler.jsonc"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-deterministic-compat": "^0.21.0",
+    "three": "^0.186.1",
+    "tweakpane": "^4.0.5"
+  },
+  "devDependencies": {
+    "@tweakpane/core": "^2.0.5",
+    "@types/node": "^26.6.3",
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "wrangler": "^4.151.3"
+  }
+}

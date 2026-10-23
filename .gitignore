@@ -1,0 +1,18 @@
+node_modules/
+dist/
+site/dist/
+.wrangler/
+.DS_Store
+.venv/
+__pycache__/
+
+# Audio stays out of git: the tracks are the artist's, and everything rendered from them is too.
+tracks/*
+!tracks/README.md
+site/public/audio
+server/cache/
+analysis/out/
+analysis/cache/
+
+# Stability AI's Stable Audio 3 repo, cloned here (see README)
+stable-audio-3/

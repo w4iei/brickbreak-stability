@@ -1,0 +1,23 @@
+[project]
+name = "brickbreak-analysis"
+version = "0.1.0"
+description = "Beat grid and zero-shot sound tags (MuQ-MuLan) for Brick Breaker's tracks"
+requires-python = ">=3.12"
+dependencies = [
+    "beat-this",
+    "librosa>=0.11",
+    "muq>=0.1.0",
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "soundfile>=0.12",
+    "soxr>=0.5",
+    "torch>=2.5,<2.9",
+    "torchaudio>=2.5,<2.9",
+    "transformers>=4.45,<4.52",  # MuQ breaks on transformers 5
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+beat-this = { git = "https://github.com/CPJKU/beat_this" }
