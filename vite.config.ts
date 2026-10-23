@@ -20,7 +20,7 @@ const siteHead: Plugin = {
         `<meta property="og:url" content="${SITE_URL}" />`,
         `<meta property="og:title" content="${SITE_TITLE}" />`,
         `<meta property="og:description" content="${SITE_DESCRIPTION}" />`,
-        `<meta property="og:image" content="${SITE_URL}og.png?v=3" />`, // ?v: a new image is fetched afresh, not from previews' caches
+        `<meta property="og:image" content="${SITE_URL}og.png?v=4" />`, // ?v: a new image is fetched afresh, not from previews' caches
         `<meta property="og:image:width" content="1200" />`,
         `<meta property="og:image:height" content="630" />`,
         `<meta name="twitter:card" content="summary_large_image" />`,

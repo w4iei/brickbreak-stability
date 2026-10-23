@@ -54,7 +54,8 @@ d.text((70, 62), "BRICK BREAKER × STABLE AUDIO", font=font(58), fill=(238, 242,
 d.text((72, 140), "Music by Yana Kunakbaeva  ·  Demo by Noah Jaffe", font=font(30, bold=False), fill=(150, 162, 174))
 
 # The row of bricks, labels running up them as in the game, all one size.
-x0, y0, bw, bh, gap, rad, line = 70, 220, 140, 230, 16, 24, 6
+x0, y0, bh, gap, rad, line = 70, 220, 230, 16, 24, 6
+bw = min(140, (W - 2 * x0 - (len(bricks) - 1) * gap) // len(bricks))  # the row fits the image, however many bricks
 size = 34
 while max(font(size).getlength(b["label"]) for b in bricks) > bh * 0.8:
     size -= 1

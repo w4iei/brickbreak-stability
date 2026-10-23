@@ -10,7 +10,7 @@ test('a new emotion gets a fresh id and a colour not on the board, and joins the
   assert.equal(a.label, 'NOSTALGIA');
   assert.ok(a.id >= 100 && !site.some((b) => b.id === a.id));
   assert.ok(!site.some((b) => b.color === a.color));
-  const b = makeEmotion('swagger', 'confident, strutting', undefined, [...site, a]);
+  const b = makeEmotion('longing', 'longing, aching', undefined, [...site, a]);
   assert.equal(b.id, a.id + 1);
   assert.notEqual(b.color, a.color);
   const row = paletteOf({ palette: 'site', extra: [a, b] }).bricks;

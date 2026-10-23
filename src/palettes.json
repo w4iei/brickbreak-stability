@@ -334,7 +334,7 @@
         "id": 16,
         "label": "DREAD",
         "pole": "dark",
-        "opposite": 15,
+        "opposite": 28,
         "note": 56,
         "color": "#2b1d3a",
         "prompt": "creeping dread, low droning cello, ticking clock, slow building tension, ominous dark synth, something is coming",
@@ -359,20 +359,20 @@
         "original": true
       },
       {
-        "id": 15,
-        "label": "WONDER",
+        "id": 28,
+        "label": "SWAGGER",
         "pole": "light",
-        "opposite": 16,
-        "note": 68,
-        "color": "#7fe7ff",
-        "prompt": "magical wonder, sparkling celesta and glockenspiel, airy choir, shimmering harp arpeggios, awe and enchantment",
-        "feel": "wondrous, magical, awestruck, enchanted, shimmering",
+        "note": 69,
+        "color": "#f5b301",
+        "prompt": "strutting funk-house swagger, slinky bassline, cocky brass stabs, confident groove, proud and playful",
+        "feel": "swaggering, confident, cocky, proud, playful",
         "listen": [
-          "music that feels full of wonder",
-          "magical and enchanting",
-          "awe and amazement",
-          "the feeling of seeing something miraculous"
-        ]
+          "music that feels swaggering",
+          "confident, cocky and proud",
+          "playful and strutting",
+          "the feeling of owning the room"
+        ],
+        "opposite": 16
       },
       {
         "id": 3,
