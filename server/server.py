@@ -212,6 +212,67 @@ def render(r: Transform) -> tuple[np.ndarray, dict]:
     return engine.transform(audio, r.prompt, r.strength, r.seed, negative=neg, cfg=r.cfg, latents=n)
 
 
+# ── the versions' envelopes, from their renders on disk: the Listen tab asks while a new emotion pre-renders, so its
+# lane fills in as the GPU gets through it, not only where the track has been played.
+class Chunk(BaseModel):
+    version: str  # the brick
+    start: float  # s: the stretch of the track this chunk plays alone (its start to the next chunk's)
+    span: float
+    request: Transform  # the render, as the game asks for it
+
+
+class Versions(BaseModel):
+    duration: float  # s, the track's
+    chunks: list[Chunk]
+
+
+chunk_levels: dict[tuple[Path, int, int], tuple[np.ndarray, np.ndarray]] = {}  # (render file, bins) → peak, rms dB
+
+
+def levels(f: Path, start: float, b0: int, b1: int) -> tuple[np.ndarray, np.ndarray] | None:
+    """Peak and RMS (dBFS) of bins b0..b1 of the track in the render file `f`, which starts at `start` s."""
+    key = (f, b0, b1)
+    if key not in chunk_levels:
+        try:
+            y, sr = sf.read(str(f), dtype="float32", always_2d=True)
+        except (OSError, RuntimeError):
+            return None
+        peak, rms = np.full(b1 - b0, -60.0), np.full(b1 - b0, -60.0)
+        for j, b in enumerate(range(b0, b1)):
+            seg = y[max(0, round((b / ENVELOPE_RATE - start) * sr)):max(0, round(((b + 1) / ENVELOPE_RATE - start) * sr))]
+            if len(seg):
+                peak[j] = 20 * np.log10(max(float(np.abs(seg).max()), 1e-9))
+                rms[j] = 10 * np.log10(max(float(np.mean(seg.astype(np.float64) ** 2)), 1e-18))
+        chunk_levels[key] = (peak, rms)
+    return chunk_levels[key]
+
+
+def envelopes_of(q: Versions) -> dict:
+    n = math.ceil(q.duration * ENVELOPE_RATE)
+    out: dict[str, dict] = {}
+    for c in q.chunks:
+        v = out.setdefault(c.version, {"peak": np.zeros(n, np.uint8), "rms": np.zeros(n, np.uint8), "have": 0, "total": 0})
+        v["total"] += 1
+        f = render_file(c.request)
+        b0, b1 = max(0, math.ceil(c.start * ENVELOPE_RATE)), min(n, math.floor((c.start + c.span) * ENVELOPE_RATE))
+        lv = levels(f, c.request.start, b0, b1) if b1 > b0 and f.is_file() else None
+        if lv is None:
+            continue
+        v["have"] += 1
+        for arr, db in zip((v["peak"], v["rms"]), lv):
+            arr[b0:b1] = np.clip(np.round((db + 60) * 4), 1, 255)  # 0 is kept for "not rendered yet"
+    b64 = lambda a: base64.b64encode(a.tobytes()).decode()  # noqa: E731
+    return {"rate": ENVELOPE_RATE, "versions": {k: {"peak": b64(v["peak"]), "rms": b64(v["rms"]), "have": v["have"],
+                                                  "total": v["total"]} for k, v in out.items()}}
+
+
+@app.post("/api/envelopes")
+async def version_envelopes(q: Versions) -> dict:
+    """Each version's envelope as far as it is on disk (bytes as /api/envelope; 0 = not rendered yet), and how many
+    of its chunks are in."""
+    return await asyncio.get_running_loop().run_in_executor(disk, envelopes_of, q)
+
+
 @app.post("/api/transform")
 async def transform(r: Transform, request: Request) -> Response:
     track_path(r.track)

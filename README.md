@@ -19,13 +19,15 @@ the ADE 2026 hackathon on Blaine's physics sequencer ([Fenrir Labs](https://gith
 - Strength 0.75 (how much of the original is replaced) and push 2.5 (how hard it leans away from the opposite).
 - The game works out which bricks the ball will hit next, so their audio is ready before it gets there.
 - The Listen tab shows every version of the track side by side, with one playhead: switch versions, or jump anywhere.
+  Tap a brick in the game to hear its version there.
 
 ## Two ways to run
 
 - **The public site** plays pre-rendered files. No model and no server: it runs on any phone.
 - **Offline**, on a Mac with Apple silicon, the music is rendered on your computer as you play. You can change the
   strength and push, send each emotion out as a MIDI note, and add your own emotions (menu → New emotion: a name, a
-  few words, and what it moves away from).
+  few words, what it moves away from and a colour). A new emotion renders in the background (about a minute a track)
+  and its Listen lane fills in as it does.
 
 ## Run it offline
 

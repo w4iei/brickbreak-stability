@@ -27,17 +27,22 @@ function saveEmotions(list: PaletteBrick[]) {
   }
 }
 
-// words: what the music should feel like, comma-separated ("nostalgic, wistful, warm, hazy").
-export function makeEmotion(label: string, words: string, opposite: number | undefined, board: PaletteBrick[]): PaletteBrick {
-  const id = Math.max(FIRST_ID - 1, ...board.map((b) => b.id)) + 1;
+// The colour a new brick gets unless one is picked: the first of COLOURS not already on the board.
+export const nextColour = (board: PaletteBrick[]) => {
   const used = new Set(board.map((b) => b.color.toLowerCase()));
+  return COLOURS.find((c) => !used.has(c)) ?? COLOURS[board.length % COLOURS.length];
+};
+
+// words: what the music should feel like, comma-separated ("nostalgic, wistful, warm, hazy").
+export function makeEmotion(label: string, words: string, opposite: number | undefined, board: PaletteBrick[], color?: string): PaletteBrick {
+  const id = Math.max(FIRST_ID - 1, ...board.map((b) => b.id)) + 1;
   return {
     id,
     label: label.trim().toUpperCase().slice(0, MAX_LABEL),
     pole: 'light',
     opposite: opposite ?? id, // its own id: no push (renderPrompts finds no opposite)
     note: 72 + ((id - FIRST_ID) % 24),
-    color: COLOURS.find((c) => !used.has(c)) ?? COLOURS[(id - FIRST_ID) % COLOURS.length],
+    color: color ?? nextColour(board),
     prompt: words.trim(),
     feel: words.trim(),
     listen: [words.trim()],
@@ -49,6 +54,8 @@ const CSS = `
 .site-form label { display: grid; gap: 5px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .site-form input, .site-form select { font: inherit; font-size: 15px; color: var(--fg); background: #1a2129; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; -webkit-user-select: text; user-select: text; }
 .site-form input:focus-visible, .site-form select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.site-form .pair { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+.site-form input[type="color"] { width: 54px; height: 42px; padding: 4px; cursor: pointer; }
 .site-form .err { margin: 0; min-height: 1.2em; font-size: 13px; color: #ff8a7a; }
 .site-mine { display: grid; gap: 6px; }
 .site-mine:empty { display: none; }
@@ -82,7 +89,7 @@ export function createEmotionCard(d: {
     <form class="site-form" data-k="form">
       <label>Name<input data-k="name" maxlength="${MAX_LABEL}" placeholder="NOSTALGIA" autocomplete="off" required /></label>
       <label>Words<input data-k="words" placeholder="nostalgic, wistful, warm, hazy" autocomplete="off" required /></label>
-      <label>Away from<select data-k="opposite"></select></label>
+      <div class="pair"><label>Away from<select data-k="opposite"></select></label><label>Colour<input type="color" data-k="colour" /></label></div>
       <p class="err" data-k="err"></p>
       <div class="go"><button class="big" type="submit">Add</button><button type="button" data-k="close">Close</button></div>
     </form>
@@ -90,11 +97,12 @@ export function createEmotionCard(d: {
   </div>`;
   document.body.append(sheet);
   const $ = <T extends HTMLElement>(k: string) => sheet.querySelector<T>(`[data-k="${k}"]`)!;
-  const [name, words, opposite, err] = [$<HTMLInputElement>('name'), $<HTMLInputElement>('words'), $<HTMLSelectElement>('opposite'), $('err')];
+  const [name, words, opposite, colour, err] = [$<HTMLInputElement>('name'), $<HTMLInputElement>('words'), $<HTMLSelectElement>('opposite'), $<HTMLInputElement>('colour'), $('err')];
   sheet.addEventListener('click', (e) => e.target === sheet && (sheet.hidden = true));
   $('close').addEventListener('click', () => (sheet.hidden = true));
 
   function show() {
+    colour.value = nextColour(d.board());
     const feelings = d.board().filter((b) => !b.original);
     opposite.innerHTML = [...feelings.map((b) => `<option value="${b.id}">${esc(b.label)}</option>`), '<option value="">Nothing</option>'].join('');
     $('mine').innerHTML = d
@@ -115,7 +123,7 @@ export function createEmotionCard(d: {
     const label = name.value.trim().toUpperCase();
     if (!label || !words.value.trim()) return void (err.textContent = 'Give it a name and a few words.');
     if (d.board().some((b) => b.label === label)) return void (err.textContent = `${label} is already on the board.`);
-    const b = makeEmotion(label, words.value, opposite.value ? Number(opposite.value) : undefined, d.board());
+    const b = makeEmotion(label, words.value, opposite.value ? Number(opposite.value) : undefined, d.board(), colour.value);
     const list = [...d.mine(), b];
     saveEmotions(list);
     d.onChange(list);

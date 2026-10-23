@@ -23,12 +23,13 @@ export interface ListenView {
   setBricks(bricks: PaletteBrick[]): void; // the lanes, again (a new emotion added or removed)
   setTrack(id: string, duration: number): void; // id: what loadEnvelope is asked for
   fill(version: string, start: number, span: number, buffer: AudioBuffer): void; // audio of a version: its envelope there
+  merge(f: EnvelopeFile): void; // versions' envelopes as far as they are rendered (a 0 byte: not yet)
   update(pos: number, active: number | undefined, pending: boolean, paused: boolean): void;
 }
 
 export interface EnvelopeFile {
   rate: number; // bins per s
-  versions: Record<string, { peak: string; rms: string }>; // one byte per bin: (dBFS + 60) × 4
+  versions: Record<string, { peak: string; rms: string; have?: number; total?: number }>; // one byte per bin: (dBFS + 60) × 4
 }
 type Levels = { rate: number; versions: Record<string, { peak: Float32Array; rms: Float32Array }> };
 
@@ -93,6 +94,7 @@ const lit = (hex: string) => {
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] > 0.45; // as the bricks' labels (render.ts)
 };
 const dB = (b64: string) => Float32Array.from(atob(b64), (ch) => ch.charCodeAt(0) / 4 - 60);
+const bytes = (b64: string) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0));
 
 export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: string) => Promise<EnvelopeFile | undefined>, d: ListenDeps): ListenView {
   const style = document.createElement('style');
@@ -355,6 +357,19 @@ export function createListenView(bricks: PaletteBrick[], loadEnvelope: (id: stri
         v.rms[b] = 10 * Math.log10(Math.max(sum / ((i1 - i0) * chans.length), 1e-18));
       }
       dirty.add(version);
+      redraw();
+    },
+    merge(f) {
+      if (!duration || f.rate !== levels.rate) return;
+      const n = Math.ceil(duration * levels.rate);
+      for (const [k, e] of Object.entries(f.versions)) {
+        if (fromFile.has(k)) continue;
+        const v = (levels.versions[k] ??= { peak: new Float32Array(n).fill(-Infinity), rms: new Float32Array(n).fill(-Infinity) });
+        const [p, r] = [bytes(e.peak), bytes(e.rms)];
+        for (let b = 0; b < Math.min(n, p.length); b++)
+          if (p[b]) [v.peak[b], v.rms[b]] = [p[b] / 4 - 60, r[b] / 4 - 60];
+        dirty.add(k);
+      }
       redraw();
     },
     update(pos, active, pending, paused) {

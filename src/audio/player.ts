@@ -787,6 +787,18 @@ export function createPlayer(getPalette: () => Palette, settings: BreakoutSettin
     get duration() {
       return track?.duration;
     },
+    // Every chunk of every version of this track, as the server renders it (offline: the Listen tab's envelopes, from
+    // the renders on its disk).
+    versionChunks() {
+      if (site || !track || settings.intensity <= 0) return undefined;
+      const t = track;
+      const n = Math.ceil((t.duration - (t.grid.origin ?? 0)) / t.grid.hop);
+      const bricks = getPalette().bricks.filter((b) => !b.original);
+      const chunks = bricks.flatMap((b) =>
+        Array.from({ length: n }, (_, k) => ({ version: String(b.id), start: chunkStart(t.grid, k), span: t.grid.hop, request: requestOf(t, b.id, k)! })),
+      );
+      return { track: t.name, duration: t.duration, chunks };
+    },
     forecast(f: ForecastHit[]) {
       hits = f.map((h) => ({ brick: h.bodyId, epoch: h.epoch, weight: h.weight }));
     },

@@ -20,6 +20,7 @@ import { halfWidth, TOP, topFor, widthFor } from './worker/scenes/field.ts';
 const STATIC = import.meta.env.MODE === 'site';
 const manifest: SiteManifest | undefined = STATIC ? await (await fetch(`${import.meta.env.BASE_URL}audio/manifest.json`)).json() : undefined;
 const IDLE_DEMO_MS = 20_000; // no steering for this long, and the paddle plays itself again
+const ENVELOPE_POLL_MS = 2000; // offline, Listen open: how often the versions' envelopes are asked for
 
 const STATS_WINDOW_MS = 1000;
 const DEBUG_LOG_SIZE = 500;
@@ -294,6 +295,36 @@ function endListen() {
   setPaused(true);
   player.seek(0);
 }
+// Offline, while Listen is open: each version's envelope from the renders on the server's disk, so a new emotion's
+// lane fills in as it pre-renders. A version with every chunk in is not asked for again until the track or a setting
+// that changes its renders does (which starts its lanes afresh).
+let complete = new Set<string>();
+let completeFor = '';
+let asking = false;
+setInterval(async () => {
+  if (STATIC || !listening || document.hidden || asking) return;
+  const q = player.versionChunks();
+  if (!q) return;
+  const key = JSON.stringify([q.track, breakout.intensity, breakout.push, breakout.style, sim.extra.map((b) => b.id)]);
+  if (key !== completeFor) {
+    if (completeFor && JSON.parse(completeFor)[0] === q.track) listen.setTrack(q.track, q.duration); // renders changed
+    [complete, completeFor] = [new Set(), key];
+  }
+  const chunks = q.chunks.filter((c) => !complete.has(c.version));
+  if (!chunks.length) return;
+  asking = true;
+  try {
+    const r = await fetch('/api/envelopes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ duration: q.duration, chunks }) });
+    const f = (await r.json()) as EnvelopeFile;
+    if (player.trackInfo?.name !== q.track || completeFor !== key) return; // moved on meanwhile
+    listen.merge(f);
+    for (const [k, v] of Object.entries(f.versions)) if (v.total && v.have === v.total) complete.add(k);
+  } catch (err) {
+    console.warn('Envelopes from the server failed:', err);
+  } finally {
+    asking = false;
+  }
+}, ENVELOPE_POLL_MS);
 // The field shaped like the screen, edge to edge. Upright, taller (bricks under the bar, the paddle at the foot; the
 // ball faster by as much, so hits come as often); on its side, wider. A turned phone rebuilds the field; the track
 // plays on.
@@ -318,18 +349,45 @@ addEventListener('resize', () => {
 site.setPaused(paused);
 site.setMuted(true);
 site.setActive(undefined);
+// A tap on a brick: that emotion in the Listen tab, playing (with sound: the tap allows it) from where the track is.
+function listenTo(id: number) {
+  setListen(true);
+  choose(id);
+  if (player.muted) setSound(true);
+  else if (paused) setPaused(false);
+}
+// Dragging anywhere on the board steers the paddle; a tap on a brick opens it in Listen instead (a drag that starts on
+// one still steers, once it has moved).
+const TAP_PX = 10;
 let dragging: number | undefined; // the pointer steering the paddle
-canvas.addEventListener('pointerdown', (e) => {
+let tap: { id: number; x: number; y: number; brick: number } | undefined; // a press on a brick, not yet a drag
+function startSteering(e: PointerEvent, launch: boolean) {
   dragging = e.pointerId;
-  steer(renderer.toWorldX(e.clientX), true); // a tap also serves a waiting ball
+  steer(renderer.toWorldX(e.clientX), launch);
   try {
     canvas.setPointerCapture(e.pointerId); // keep the drag when the finger leaves the board
   } catch {
     /* a pointer the browser no longer tracks */
   }
+}
+canvas.addEventListener('pointerdown', (e) => {
+  const brick = renderer.brickAt(e.clientX, e.clientY);
+  if (brick !== undefined) tap = { id: e.pointerId, x: e.clientX, y: e.clientY, brick };
+  else startSteering(e, true); // a tap also serves a waiting ball
 });
-canvas.addEventListener('pointermove', (e) => e.pointerId === dragging && steer(renderer.toWorldX(e.clientX)));
-for (const ev of ['pointerup', 'pointercancel'] as const) canvas.addEventListener(ev, () => (dragging = undefined));
+canvas.addEventListener('pointermove', (e) => {
+  if (tap?.id === e.pointerId && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > TAP_PX) {
+    tap = undefined;
+    startSteering(e, false);
+  }
+  if (e.pointerId === dragging) steer(renderer.toWorldX(e.clientX));
+  else if (e.pointerType === 'mouse' && !e.buttons) canvas.style.cursor = renderer.brickAt(e.clientX, e.clientY) === undefined ? '' : 'pointer';
+});
+canvas.addEventListener('pointerup', (e) => {
+  if (tap?.id === e.pointerId) listenTo(tap.brick);
+  tap = dragging = undefined;
+});
+canvas.addEventListener('pointercancel', () => (tap = dragging = undefined));
 setInterval(() => {
   if (sim.autoplay || Date.now() - lastSteer < IDLE_DEMO_MS) return;
   sim.autoplay = true; // back to the demo

@@ -339,6 +339,16 @@ export function createRenderer(canvas: HTMLCanvasElement) {
       const r = canvas.getBoundingClientRect();
       return flatCamera.left + ((clientX - r.left) / r.width) * (flatCamera.right - flatCamera.left);
     },
+    // The brick under a page point, if any (its id).
+    brickAt(clientX: number, clientY: number) {
+      if (!bricks) return undefined;
+      const r = canvas.getBoundingClientRect();
+      const x = flatCamera.left + ((clientX - r.left) / r.width) * (flatCamera.right - flatCamera.left);
+      const y = flatCamera.top - ((clientY - r.top) / r.height) * (flatCamera.top - flatCamera.bottom);
+      const [hx, hy] = bricks.half;
+      const i = bricks.id.findIndex((_, k) => Math.abs(x - bricks!.at[2 * k]) <= hx && Math.abs(y - bricks!.at[2 * k + 1]) <= hy);
+      return i >= 0 ? bricks.id[i] : undefined;
+    },
     setInfo(info: SceneInfo) {
       radii = info.radii;
       flat = info.flat;
