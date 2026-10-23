@@ -3,9 +3,9 @@ import { fillTrack } from './prompts.ts';
 
 // Offline only: emotions made on this computer. Each is a brick like the palette's own, added at the end of the row,
 // but its texts are typed in whole: what Stable Audio is steered toward and what it is pushed away from, with {track}
-// standing for what the track already is (so a new one can ask for a saxophone as much as for a feeling). They are kept by the local
-// server (server/emotions.json), so every browser on this computer has the same ones, and in this browser as a
-// fallback. Their renders are made by the local server as they play, like any other brick's.
+// standing for what the track already is (so a new one can ask for an instrument as much as for a feeling). They are
+// kept by the local server (server/emotions.json), so every browser on this computer has the same ones, and in this
+// browser as a fallback. Their renders are made by the local server as they play, like any other brick's.
 
 const KEY = 'brickbreak.emotions';
 const FIRST_ID = 100; // above every palette's ids
@@ -179,7 +179,7 @@ export function createEmotionCard(d: {
     <p>Name it and write what the track should become: a feeling, an instrument, a sound. Stable Audio reshapes it toward that, here on this computer, as it plays.</p>
     <form class="site-form" data-k="form">
       <label>Name<input data-k="name" maxlength="${MAX_LABEL}" placeholder="LONGING" autocomplete="off" required /></label>
-      <label>Prompt<textarea data-k="prompt" rows="3" placeholder="{track}, longing, aching, saxophone solo" required></textarea></label>
+      <label>Prompt<textarea data-k="prompt" rows="3" placeholder="{track}, longing, aching, soft piano chords" required></textarea></label>
       <div class="pair"><label>Away from<select data-k="opposite"></select></label><label>Colour<input type="color" data-k="colour" /></label></div>
       <textarea data-k="negative" rows="2" aria-label="Away from, in words" placeholder="Nothing: no push"></textarea>
       <p class="hint"><code>{track}</code> is what the track already is: <i data-k="source"></i>. Keep it to keep the track's sound.</p>

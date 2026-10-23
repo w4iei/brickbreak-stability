@@ -41,8 +41,8 @@ test('texts typed whole: {track} becomes the track, the result matches the words
   const typed = makeFromTexts('lust', '{track}, lustful, sensual', `{track}, ${serenity.feel}`, serenity.id, site);
   const src = 'trance, techno, 140 BPM';
   assert.deepEqual(renderPrompts(typed, serenity, 'source', src), renderPrompts(words, serenity, 'source', src)); // same renders
-  const sax = makeFromTexts('longing', 'longing, {track}, saxophone solo', '', undefined, site);
-  assert.deepEqual(renderPrompts(sax, undefined, 'source', src), { prompt: `longing, ${src}, saxophone solo`, negative: '' });
+  const keys = makeFromTexts('longing', 'longing, {track}, soft piano chords', '', undefined, site);
+  assert.deepEqual(renderPrompts(keys, undefined, 'source', src), { prompt: `longing, ${src}, soft piano chords`, negative: '' });
   assert.equal(fillTrack('{track}, lonely', ''), 'lonely'); // no analysis: no stray comma
-  assert.equal(sax.feel, 'longing, saxophone solo');
+  assert.equal(keys.feel, 'longing, soft piano chords');
 });

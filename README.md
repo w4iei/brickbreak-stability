@@ -27,7 +27,7 @@ the ADE 2026 hackathon on Blaine's physics sequencer ([Fenrir Labs](https://gith
 - **Offline**, on a Mac with Apple silicon, the music is rendered on your computer as you play. You can change the
   strength and push, send each emotion out as a MIDI note, and add your own (menu → New emotion, or + New emotion
   under the Listen lanes). You write the whole prompt and what it is pushed away from: a feeling, an instrument, a sound
-  (`{track}, longing, saxophone solo`). `{track}` stands for what the track already is, so it keeps its sound; leave
+  (`{track}, longing, soft piano chords`). `{track}` stands for what the track already is, so it keeps its sound; leave
   it out to describe the music from scratch. Each one has its own strength (how much of the original is replaced:
   about 0.75 changes the mood, an instrument the track doesn't have needs 0.85 or more) and push; pushed away from
   "the track as it is", the push leans on exactly the words you added. The card shows the exact texts as you type,
